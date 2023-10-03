@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "sku": "123",
+      "title": "Test Product",
+      "description": "Test product description",
+      "price": 20
+    },
+    {
+      "sku": "234",
+      "title": "Test Product 2",
+      "description": "Test product description",
+      "price": 20
+    },
+    {
+      "sku": "345",
+      "title": "Test Product 3",
+      "description": "Test product description",
+      "price": 20
+    }
+  ]
+}
