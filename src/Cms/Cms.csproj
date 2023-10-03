@@ -20,4 +20,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Translations\**\*" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Integrations\Magento\Provider\" />
+  </ItemGroup>
 </Project>
