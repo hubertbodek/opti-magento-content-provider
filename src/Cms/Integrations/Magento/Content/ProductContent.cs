@@ -16,12 +16,4 @@ public class ProductContent : ContentBase
     public virtual string Description { get; set; }
     
     public virtual int Price { get; set; }
-    
-    public enum CommerceContentType
-    {
-        ContentFolder,
-        DateContentFolder,
-        Product,
-        Category
-    }
 }

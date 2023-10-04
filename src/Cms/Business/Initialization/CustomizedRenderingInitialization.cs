@@ -1,4 +1,5 @@
 using Cms.Business.Rendering;
+using Cms.Integrations.Magento;
 using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
@@ -20,7 +21,8 @@ public class CustomizedRenderingInitialization : IConfigurableModule
         context.ConfigurationComplete += (o, e) =>
             // Register custom implementations that should be used in favour of the default implementations
             context.Services.AddTransient<IContentRenderer, ErrorHandlingContentRenderer>()
-                .AddSingleton<AlloyContentAreaItemRenderer, AlloyContentAreaItemRenderer>();
+                .AddSingleton<AlloyContentAreaItemRenderer, AlloyContentAreaItemRenderer>()
+                .AddSingleton<IProductService, ProductService>();
     }
 
     public void Initialize(InitializationEngine context) =>

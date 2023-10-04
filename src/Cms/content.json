@@ -1,22 +1,22 @@
 {
   "products": [
     {
-      "sku": "123",
-      "title": "Test Product",
-      "description": "Test product description",
-      "price": 20
+      "Sku": "123",
+      "Title": "Test Product",
+      "Description": "Test product description",
+      "Price": 20
     },
     {
-      "sku": "234",
-      "title": "Test Product 2",
-      "description": "Test product description",
-      "price": 20
+      "Sku": "234",
+      "Title": "Test Product 2",
+      "Description": "Test product description",
+      "Price": 20
     },
     {
-      "sku": "345",
-      "title": "Test Product 3",
-      "description": "Test product description",
-      "price": 20
+      "Sku": "345",
+      "Title": "Test Product 3",
+      "Description": "Test product description",
+      "Price": 20
     }
   ]
 }
