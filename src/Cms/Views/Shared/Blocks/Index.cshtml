@@ -1,0 +1,12 @@
+@model ProductsCollectionBlock
+
+<div>
+    Products collection block
+    @if (Model.Products != null)
+    {
+        @Html.PropertyFor(m => m.Products, new
+        {
+            ChildrenCustomTagName = "ProductContent"
+        })
+    }
+</div>

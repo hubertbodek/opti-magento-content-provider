@@ -1,28 +1,31 @@
 using System.Collections.Specialized;
-using Cms.Integrations.Magento.Content;
+using Cms.Integrations.Magento.Client;
 using EPiServer.Core.Internal;
-using EPiServer.DataAccess;
 using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
-using EPiServer.Security;
 using EPiServer.ServiceLocation;
 
-namespace Cms.Integrations.Magento.Provider;
+namespace Cms.Integrations.Magento;
 
 [InitializableModule]
 [ModuleDependency(typeof(EPiServer.Web.InitializationModule))]
 public class MagentoProviderInitialization : IInitializableModule
 {
-    public void Initialize(InitializationEngine context)
+    private Injected<IMagentoClient> _magentoClient;
+    public async void Initialize(InitializationEngine context)
     {
-        var magentoProvider = new MagentoProvider();
+        var products = await _magentoClient.Service.GetProducts();
+
+        var magentoProvider = new MagentoProvider(products);
         var providerValues = new NameValueCollection
         {
             { ContentProviderParameter.EntryPoint, MagentoProvider.GetEntryPoint("magento").ContentLink.ToString() },
             { ContentProviderParameter.Capabilities, "Create,Edit,Delete,Search" }
         };
+
         
         magentoProvider.Initialize(MagentoProvider.Key, providerValues);
+        magentoProvider.ClearProviderPagesFromCache();
         var providerManager = context.Locate.Advanced.GetInstance<IContentProviderManager>();
         providerManager.ProviderMap.AddProvider(magentoProvider);
     }

@@ -1,4 +1,5 @@
 using Cms.Extensions;
+using Cms.Integrations.Magento.Client;
 using EPiServer.Cms.Shell;
 using EPiServer.Cms.UI.AspNetIdentity;
 using EPiServer.Scheduler;
@@ -23,6 +24,14 @@ public class Startup
             AppDomain.CurrentDomain.SetData("DataDirectory", Path.Combine(_webHostingEnvironment.ContentRootPath, "App_Data"));
 
             services.Configure<SchedulerOptions>(options => options.Enabled = false);
+            // services.AddHttpClient<IMagentoClient, MagentoClient>("magento", client =>
+            // {
+            //     client.BaseAddress = new Uri("https://app.magento-commerce.test/rest/V1/");
+            // });
+            services.AddMagentoClient(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri("https://app.magento-commerce.test/rest/V1/");
+            });
         }
 
         services

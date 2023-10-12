@@ -1,6 +1,7 @@
 using Cms.Business;
 using Cms.Business.Channels;
 using Cms.Business.Rendering;
+using Cms.Integrations.Magento.Client;
 using EPiServer.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -36,4 +37,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IphoneVerticalResolution>();
         services.AddSingleton<AndroidVerticalResolution>();
     }
+    
+    public static IHttpClientBuilder AddMagentoClient(
+        this IServiceCollection services,
+        Action<HttpClient> configureClient) =>
+        services.AddHttpClient<IMagentoClient, MagentoClient>("magento", (httpClient) =>
+        {
+            MagentoClientFactory.ConfigureHttpClient(httpClient, ApiConstants.Token);
+            configureClient(httpClient);
+        });
 }
