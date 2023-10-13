@@ -4,5 +4,6 @@ public enum MagentoContentType
 {
     CategoryContent,
     ProductContent,
-    ContentFolder
+    ContentFolder,
+    NestedContentFolder
 }

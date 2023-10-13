@@ -15,7 +15,7 @@ public static class MagentoClientFactory
         HttpClient httpClient, string token)
     {
         ConfigureHttpClientCore(httpClient);
-        
+
         var headers = httpClient.DefaultRequestHeaders;
         headers.Add("Authorization", $"Bearer {token}");
     }

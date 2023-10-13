@@ -1,7 +1,7 @@
 namespace Cms.Integrations.Magento.Content;
 
 [ContentType(
-    GUID = "DE8A22EF-EDD4-4F42-BD8B-4DEFFE3C8244",
+    GUID = "e8522b9a-daff-4726-bfb2-4c5f461dbbd2",
     DisplayName = "Magento Content Folder",
     AvailableInEditMode = false,
     GroupName = "Magento")]

@@ -15,8 +15,9 @@ public class MagentoProviderInitialization : IInitializableModule
     public async void Initialize(InitializationEngine context)
     {
         var products = await _magentoClient.Service.GetProducts();
+        var categories = await _magentoClient.Service.GetCategories();
 
-        var magentoProvider = new MagentoProvider(products);
+        var magentoProvider = new MagentoProvider(products, categories);
         var providerValues = new NameValueCollection
         {
             { ContentProviderParameter.EntryPoint, MagentoProvider.GetEntryPoint("magento").ContentLink.ToString() },

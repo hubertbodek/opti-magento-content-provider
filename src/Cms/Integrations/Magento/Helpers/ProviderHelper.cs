@@ -43,11 +43,12 @@ public class ProviderHelper
     public CategoryContent MapCategoryToContent(CategoryExternal category)
     {
         var categoryContent =
-            CreateContent<CategoryContent>(MagentoResourceType.Category, MagentoContentType.CategoryContent, category.Id);
+            CreateContent<CategoryContent>(MagentoResourceType.Category, MagentoContentType.CategoryContent, category.Id.ToString());
         
-        categoryContent.Id = category.Id;
-        categoryContent.Title = category.Title;
-        categoryContent.Description = category.Description;
+        categoryContent.Id = category.Id.ToString();
+        categoryContent.Title = category.Name;
+        categoryContent.Name = category.Name;
+        categoryContent.Description = "Temporary test description";
         
         categoryContent.MakeReadOnly();
         
@@ -85,7 +86,7 @@ public class ProviderHelper
         /* Find parent */
         var parentLink = _entryPoint;
         /* Getting parent id */
-        if (contentType != MagentoContentType.ContentFolder)
+        if (contentType != MagentoContentType.ContentFolder && contentType != MagentoContentType.NestedContentFolder)
             parentLink = new ContentReference(parentContentId, _providerKey);
 
         var epiContentType = _contentTypeRepository.Service.Load(modelType);
@@ -126,6 +127,13 @@ public class ProviderHelper
         return MappedIdentity.ConstructExternalIdentifier(
             _providerKey,
             $"{contentType.ToString()}/{resourceType.ToString()}/{id}/");
+    }
+    
+    public Uri CreateExternalId(string folderName, MagentoContentType contentType, string id)
+    {
+        return MappedIdentity.ConstructExternalIdentifier(
+            _providerKey,
+            $"{contentType.ToString()}/{folderName}/{id}/");
     }
     
     

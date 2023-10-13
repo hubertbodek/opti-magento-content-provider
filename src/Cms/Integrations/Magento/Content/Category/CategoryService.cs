@@ -4,12 +4,7 @@ public class CategoryService
 {
     public static IList<CategoryExternal> GetAll()
     {
-        return new List<CategoryExternal>()
-        {
-            new() { Id = "1", Title = "Men", Description = "Men products" },
-            new() { Id = "2", Title = "Women", Description = "Women products" },
-            new() { Id = "3", Title = "Accessories", Description = "Accessories products" },
-        };
+        return new List<CategoryExternal>();
     }
 
     public static CategoryExternal GetCategoryById(string id)
