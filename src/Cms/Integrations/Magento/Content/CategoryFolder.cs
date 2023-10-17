@@ -6,7 +6,7 @@ namespace Cms.Integrations.Magento.Content;
     AvailableInEditMode = false,
     GroupName = "Magento")]
 
-public class MagentoCategoryFolder : ContentFolder
+public class MagentoCategoryFolder : MagentoContentFolder
 {
     [Ignore]
     public string Title { get; set; }

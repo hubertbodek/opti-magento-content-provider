@@ -18,4 +18,6 @@ public class CategoryContent : ContentBase
     
     [Editable(false)]
     public virtual string Description { get; set; }
+
+    public virtual ContentArea Products { get; set; }
 }

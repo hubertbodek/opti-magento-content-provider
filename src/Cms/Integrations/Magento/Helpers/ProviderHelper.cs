@@ -1,6 +1,7 @@
 using Cms.Integrations.Magento.Content;
 using Cms.Integrations.Magento.Content.Category;
 using Cms.Integrations.Magento.Content.Product;
+using Cms.Pages.ExternalCategoryPage;
 using EPiServer.Construction;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
@@ -22,7 +23,6 @@ public class ProviderHelper
         _entryPoint = entryPoint;
         _providerKey = providerKey;
     }
-
 
     public ProductContent MapProductToContent(ProductExternal product)
     {
@@ -54,6 +54,40 @@ public class ProviderHelper
         
         return categoryContent;
     }
+    
+    public void CreateOrUpdateCategoryPage(CategoryExternal category)
+    {
+        // var loader = ServiceLocator.Current.GetInstance<IContentLoader>();
+        // var pages = loader.GetChildren<ExternalCategoryPage>(ContentReference.StartPage);
+        // var externalId = CreateExternalId(MagentoResourceType.Category, MagentoContentType.CategoryPage, category.Id.ToString());
+        // var mappedContent = _identityMappingService.Service.Get(externalId, true);
+        
+        CreatePage<ExternalCategoryPage>(ContentReference.StartPage, (item) =>
+        {
+            item.Name = category.Name;
+            // item.CategoryReference = category.ContentLink;
+            // item.ContentLink = mappedContent.ContentLink;
+        });
+    }
+
+    private void CreateOrUpdateProductPage(ProductContent product)
+    {
+        // update - https://docs.developers.optimizely.com/content-management-system/docs/icontentrepository-and-datafactory#persist-a-content-instance
+        CreatePage<ExternalCategoryPage>(ContentReference.StartPage, (item) =>
+        {
+            item.Name = product.Name;
+        });
+    }
+
+    private static void CreatePage<T>(ContentReference parent, Action<T> applyProperties) where T : PageData
+    {
+        var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+        var page = contentRepository.GetDefault<T>(parent);
+
+        applyProperties(page);
+
+        contentRepository.Save(page, EPiServer.DataAccess.SaveAction.Publish);
+    }
 
     private T CreateContent<T>(MagentoResourceType resourceType, MagentoContentType contentType, string id) where T : ContentBase
     {
@@ -70,7 +104,7 @@ public class ProviderHelper
         
         content.Status = VersionStatus.Published;
         content.IsPendingPublish = false;
-        content.StartPublish = DateTime.Now.Subtract(TimeSpan.FromDays(14));
+        content.StartPublish = DateTime.Now;
         
         var externalId = CreateExternalId(resourceType, contentType, id);
 
@@ -119,8 +153,6 @@ public class ProviderHelper
 
         return content;
     }
-
-    
     
     public Uri CreateExternalId(MagentoResourceType resourceType, MagentoContentType contentType, string id)
     {
@@ -129,12 +161,26 @@ public class ProviderHelper
             $"{contentType.ToString()}/{resourceType.ToString()}/{id}/");
     }
     
-    public Uri CreateExternalId(string folderName, MagentoContentType contentType, string id)
+    public IEnumerable<GetChildrenReferenceResult> CreateChildrenReferences<T>(
+        IEnumerable<T> items,
+        Func<T, Uri> createExternalId,
+        Type modelType,
+        bool isLeafNode = true) 
     {
-        return MappedIdentity.ConstructExternalIdentifier(
-            _providerKey,
-            $"{contentType.ToString()}/{folderName}/{id}/");
+        var children = items.Select(i =>
+        {
+            var itemContentId = createExternalId(i);
+            var itemIdentity = _identityMappingService.Service.Get(itemContentId, true);
+
+            return new GetChildrenReferenceResult()
+            {
+                ContentLink = itemIdentity.ContentLink,
+                IsLeafNode = isLeafNode,
+                ModelType = modelType
+            };
+        }).ToList();
+
+        return children;
     }
-    
     
 }

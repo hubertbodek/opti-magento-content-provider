@@ -2,15 +2,6 @@ namespace Cms.Integrations.Magento.Client;
 
 public static class MagentoClientFactory
 {
-    public static IMagentoClient Create(string host, string token)
-    {
-        var httpClient = new HttpClient();
-        
-        ConfigureHttpClient(httpClient, token);
-
-        return new MagentoClient(httpClient);
-    }
-
     public static void ConfigureHttpClient(
         HttpClient httpClient, string token)
     {

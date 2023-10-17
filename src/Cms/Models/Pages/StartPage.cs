@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Cms.Models.Blocks;
+using Cms.Pages;
 using EPiServer.SpecializedProperties;
 
 namespace Cms.Models.Pages;
@@ -15,6 +16,7 @@ namespace Cms.Models.Pages;
     Availability.Specific,
     Include = new[]
     {
+        typeof(IIncludedOnHomepage),
         typeof(ContainerPage),
         typeof(ProductPage),
         typeof(StandardPage),

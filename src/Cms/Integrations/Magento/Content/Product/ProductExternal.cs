@@ -7,8 +7,7 @@ namespace Cms.Integrations.Magento.Content.Product;
 
 public class ProductExternal : MagentoExternal
 {
-    [JsonProperty("id")]
-    public int Id { get; init; }
+    
     
     [JsonProperty("sku")]
     public string Sku { get; init; }
