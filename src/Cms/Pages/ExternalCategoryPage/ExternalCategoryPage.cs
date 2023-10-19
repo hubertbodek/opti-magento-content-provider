@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Cms.Integrations.Magento.Content.Category;
+using Cms.Integrations.Magento.Content;
 using Cms.Models.Pages;
 
 namespace Cms.Pages.ExternalCategoryPage;
@@ -29,6 +29,6 @@ public class ExternalCategoryPage : SitePageData, IIncludedOnHomepage
         GroupName = Globals.GroupNames.Content)
     ]
     [Editable(false)]
-    [AllowedTypes(typeof(CategoryContent))]
+    [AllowedTypes(typeof(MagentoContentFolder))]
     public virtual ContentReference CategoryReference { get; set; }
 }

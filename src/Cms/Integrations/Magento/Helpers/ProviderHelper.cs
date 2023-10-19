@@ -54,25 +54,9 @@ public class ProviderHelper
         
         return categoryContent;
     }
-    
-    public void CreateOrUpdateCategoryPage(CategoryExternal category)
-    {
-        // var loader = ServiceLocator.Current.GetInstance<IContentLoader>();
-        // var pages = loader.GetChildren<ExternalCategoryPage>(ContentReference.StartPage);
-        // var externalId = CreateExternalId(MagentoResourceType.Category, MagentoContentType.CategoryPage, category.Id.ToString());
-        // var mappedContent = _identityMappingService.Service.Get(externalId, true);
-        
-        CreatePage<ExternalCategoryPage>(ContentReference.StartPage, (item) =>
-        {
-            item.Name = category.Name;
-            // item.CategoryReference = category.ContentLink;
-            // item.ContentLink = mappedContent.ContentLink;
-        });
-    }
 
     private void CreateOrUpdateProductPage(ProductContent product)
     {
-        // update - https://docs.developers.optimizely.com/content-management-system/docs/icontentrepository-and-datafactory#persist-a-content-instance
         CreatePage<ExternalCategoryPage>(ContentReference.StartPage, (item) =>
         {
             item.Name = product.Name;
@@ -87,6 +71,17 @@ public class ProviderHelper
         applyProperties(page);
 
         contentRepository.Save(page, EPiServer.DataAccess.SaveAction.Publish);
+    }
+
+    public IContent CreateFolder(MappedIdentity mappedItem, MagentoContentType contentType, string name)
+    {
+        return CreateContent(
+            mappedItem.ContentLink.ID,
+            mappedItem.ContentGuid,
+            int.Parse(RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3])),
+            contentType,
+            typeof(MagentoContentFolder),
+            name);
     }
 
     private T CreateContent<T>(MagentoResourceType resourceType, MagentoContentType contentType, string id) where T : ContentBase
@@ -120,7 +115,7 @@ public class ProviderHelper
         /* Find parent */
         var parentLink = _entryPoint;
         /* Getting parent id */
-        if (contentType != MagentoContentType.ContentFolder && contentType != MagentoContentType.NestedContentFolder)
+        if (contentType != MagentoContentType.ContentFolder && contentType != MagentoContentType.CategoryFolder)
             parentLink = new ContentReference(parentContentId, _providerKey);
 
         var epiContentType = _contentTypeRepository.Service.Load(modelType);
@@ -183,4 +178,8 @@ public class ProviderHelper
         return children;
     }
     
+    private static string RemoveEndingSlash(string path)
+    {
+        return !string.IsNullOrEmpty(path) && path[^1] == '/' ? path[..^1] : path;
+    }
 }

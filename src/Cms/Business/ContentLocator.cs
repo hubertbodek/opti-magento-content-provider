@@ -1,5 +1,7 @@
 using System.Globalization;
 using Cms.Models.Pages;
+using Cms.Pages;
+using EPiServer.Data;
 using EPiServer.Filters;
 using EPiServer.ServiceLocation;
 using EPiServer.Shell.Configuration;
@@ -105,5 +107,17 @@ public class ContentLocator
         }
 
         return _contentLoader.GetChildren<ContactPage>(contactsRootPageLink).OrderBy(p => p.PageName);
+    }
+
+    public FolderPage GetCategoryFolderPage(ContentReference startPage)
+    {
+        var externalCategoriesFolderLink = _contentLoader.Get<StartPage>(startPage).ExternalCategoriesFolderLink;
+
+        if (ContentReference.IsNullOrEmpty(externalCategoriesFolderLink))
+        {
+            throw new MissingConfigurationException("No category page root specified in site settings.");
+        }
+
+        return _contentLoader.Get<FolderPage>(externalCategoriesFolderLink);
     }
 }

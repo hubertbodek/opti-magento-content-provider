@@ -1,5 +1,4 @@
 using System.Web;
-// using System.Web.Caching;
 using Cms.Integrations.Magento.Client;
 using Cms.Integrations.Magento.Content;
 using Cms.Integrations.Magento.Content.Category;
@@ -36,46 +35,26 @@ public sealed class MagentoProvider : ContentProvider
 
         switch (contentType)
         {
-            case MagentoContentType.CategoryContent:
-            {
-                if (_categories == null) return default;
-                
-                var id = RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3]);
-                var category = _categories.FirstOrDefault(c => c.Id.ToString().Equals(HttpUtility.UrlDecode(id)));
-                
-                return helper.MapCategoryToContent(category);
-            }
             case MagentoContentType.ProductContent:
             {
                 if (_products == null) return default;
                 
                 var sku = RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3]);
                 var product = _products.FirstOrDefault(p => p.Sku.Equals(HttpUtility.UrlDecode(sku)));
+                
                 return helper.MapProductToContent(product);
             }
             case MagentoContentType.ContentFolder:
             {
                 var name = HttpUtility.UrlDecode(RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[2]));
             
-                return helper.CreateContent(
-                    mappedItem.ContentLink.ID,
-                    mappedItem.ContentGuid,
-                    int.Parse(RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3])),
-                    contentType,
-                    typeof(MagentoContentFolder),
-                    name);
+                return helper.CreateFolder(mappedItem, contentType, name);
             }
-            case MagentoContentType.NestedContentFolder:
+            case MagentoContentType.CategoryFolder:
             {
                 var name = HttpUtility.UrlDecode(RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[4]));
-                
-                return helper.CreateContent(
-                    mappedItem.ContentLink.ID,
-                    mappedItem.ContentGuid,
-                    int.Parse(RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3])),
-                    contentType,
-                    typeof(MagentoContentFolder),
-                    name);
+
+                return helper.CreateFolder(mappedItem, contentType, name);
             }
             default:
                 return default;
@@ -98,83 +77,16 @@ public sealed class MagentoProvider : ContentProvider
         if (mappedItem == null)
             return default;
         
-        var childrenList = new List<GetChildrenReferenceResult>();
-
         if (!TryGetResourceAndContentTypes(mappedItem.ExternalIdentifier, out var contentType, out var resourceType))
         {
             return default;
         };
 
-        switch (resourceType)
+        if (!TryGetChildrenList(resourceType, mappedItem, out var childrenList))
         {
-            // case MagentoResourceType.Product:
-            // {
-            //     FetchProducts();
-            //     
-            //     var products = helper.CreateChildrenReferences(
-            //         _products,
-            //         p =>
-            //         {
-            //             AddContentToCache(helper.MapProductToContent(p));
-            //             return helper.CreateExternalId(MagentoResourceType.Product,
-            //                 MagentoContentType.ProductContent, p.Sku);
-            //         },
-            //         typeof(ProductContent));
-            //     
-            //     childrenList.AddRange(products);
-            //     break;
-            // }
-            case MagentoResourceType.Category:
-            {
-                FetchCategories();
-                
-                // var categories = helper.CreateChildrenReferences(
-                //     _categories,
-                //     c => helper.CreateExternalId(MagentoResourceType.Category,
-                //         MagentoContentType.CategoryContent, c.Id.ToString()),
-                //     typeof(CategoryContent));
-                //
-                // childrenList.AddRange(categories);
-                if (contentType == MagentoContentType.NestedContentFolder)
-                {
-                    FetchProducts();
-                
-                    var id = RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3]);
-                    var categoryProducts = _products.FindAll(p =>
-                    {
-                        var categoryLink =
-                            p.ExtensionAttributes.CategoryLinks?.Find(category =>
-                                category.CategoryId.Equals(id));
-                
-                        return categoryLink != null;
-                    });
-                
-                    var childrenRefs = helper.CreateChildrenReferences(
-                        categoryProducts,
-                        p => helper.CreateExternalId(MagentoResourceType.Product,
-                            MagentoContentType.ProductContent, p.Sku),
-                        typeof(ProductContent));
-                
-                    childrenList.AddRange(childrenRefs);
-                }
-
-                break;
-            }
-            case MagentoResourceType.NestedCategory:
-            {
-                FetchCategories();
-                
-                var categories = helper.CreateChildrenReferences(
-                    _categories, 
-                    c => helper.CreateExternalId(MagentoResourceType.Category, MagentoContentType.NestedContentFolder, $"{c.Id.ToString()}/{c.Name}"),
-                    typeof(MagentoContentFolder),
-                    false);
-            
-                childrenList.AddRange(categories);
-                break;
-            }
-        }
-
+            return default;
+        };
+        
         return childrenList;
     }
     
@@ -195,7 +107,77 @@ public sealed class MagentoProvider : ContentProvider
         folder = contentRepository.GetDefault<ContentFolder>(ContentReference.RootPage);
         folder.Name = name;
         contentRepository.Save(folder, SaveAction.Publish, AccessLevel.NoAccess);
+        
         return folder;
+    }
+
+    private IList<GetChildrenReferenceResult> CreateTopLevelFolders(ContentReference contentLink, ProviderHelper helper)
+    {
+        var children = new List<GetChildrenReferenceResult>();
+
+        var nestedCategoryContentId = helper.CreateExternalId(MagentoResourceType.NestedCategory, MagentoContentType.ContentFolder,
+            contentLink.ID.ToString());
+ 
+        children.Add(new GetChildrenReferenceResult()
+        {
+            ContentLink = _identityMappingService.Service.Get(nestedCategoryContentId, true).ContentLink,
+            IsLeafNode = false,
+            ModelType = typeof(MagentoCategoryFolder)
+        });
+
+        return children;
+    }
+    
+    private bool TryGetChildrenList(MagentoResourceType resourceType, MappedIdentity mappedItem, out List<GetChildrenReferenceResult> childrenList)
+    {
+        childrenList = new List<GetChildrenReferenceResult>();
+        var helper = new ProviderHelper(EntryPoint, ProviderKey);
+
+        switch (resourceType)
+        {
+            case MagentoResourceType.Category:
+            {
+                FetchCategories();
+                FetchProducts();
+                
+                var id = RemoveEndingSlash(mappedItem.ExternalIdentifier.Segments[3]);
+                var categoryProducts = _products.FindAll(p =>
+                {
+                    var categoryLink =
+                        p.ExtensionAttributes.CategoryLinks?.Find(category =>
+                            category.CategoryId.Equals(id));
+                
+                    return categoryLink != null;
+                });
+                
+                var childrenRefs = helper.CreateChildrenReferences(
+                    categoryProducts,
+                    p => helper.CreateExternalId(MagentoResourceType.Product,
+                        MagentoContentType.ProductContent, p.Sku),
+                    typeof(ProductContent));
+                
+                childrenList.AddRange(childrenRefs);
+
+                break;
+            }
+            case MagentoResourceType.NestedCategory:
+            {
+                FetchCategories();
+                
+                var categories = helper.CreateChildrenReferences(
+                    _categories, 
+                    c => helper.CreateExternalId(MagentoResourceType.Category, MagentoContentType.CategoryFolder, $"{c.Id.ToString()}/{c.Name}"),
+                    typeof(MagentoContentFolder),
+                    false);
+            
+                childrenList.AddRange(categories);
+                break;
+            }
+            default:
+                return false;
+        }
+
+        return true;
     }
 
     private static bool TryGetResourceAndContentTypes(Uri externalId, out MagentoContentType contentType,
@@ -236,45 +218,6 @@ public sealed class MagentoProvider : ContentProvider
             .GetAwaiter()
             .GetResult();
     }
-
-    private IList<GetChildrenReferenceResult> CreateTopLevelFolders(ContentReference contentLink, ProviderHelper helper)
-    {
-        var children = new List<GetChildrenReferenceResult>();
-
-        // var productsContentId =
-        //     helper.CreateExternalId(MagentoResourceType.Product, MagentoContentType.ContentFolder, contentLink.ID.ToString());
-        // var categoryContentId = helper.CreateExternalId(MagentoResourceType.Category, MagentoContentType.ContentFolder,
-        //     contentLink.ID.ToString());
-        var nestedCategoryContentId = helper.CreateExternalId(MagentoResourceType.NestedCategory, MagentoContentType.ContentFolder,
-            contentLink.ID.ToString());
-            
-        // children.Add(new GetChildrenReferenceResult()
-        // {
-        //     ContentLink = _identityMappingService.Service.Get(productsContentId, true).ContentLink,
-        //     IsLeafNode = false,
-        //     ModelType = typeof(MagentoContentFolder)
-        // });
-        // children.Add(new GetChildrenReferenceResult()
-        // {
-        //     ContentLink = _identityMappingService.Service.Get(categoryContentId, true).ContentLink,
-        //     IsLeafNode = false,
-        //     ModelType = typeof(MagentoContentFolder)
-        // });  
-        children.Add(new GetChildrenReferenceResult()
-        {
-            ContentLink = _identityMappingService.Service.Get(nestedCategoryContentId, true).ContentLink,
-            IsLeafNode = false,
-            ModelType = typeof(MagentoCategoryFolder)
-        });
-
-        return children;
-    }
-
-    // private void CreateCategoryPages(List<CategoryExternal> categories, ProviderHelper helper)
-    // {
-    //     if()
-    //     
-    // }
     
     private static string RemoveEndingSlash(string path)
     {

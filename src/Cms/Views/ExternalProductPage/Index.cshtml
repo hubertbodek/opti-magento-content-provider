@@ -1,1 +1,8 @@
-<div>Product Page</div>
+@model PageViewModel<Cms.Pages.ExternalProductPage>
+
+<div>
+    <p>Product Page</p>
+    <h1>@Model.CurrentPage.Title</h1>
+    <p>@Model.CurrentPage.Description</p>
+    <p>Price: <strong>@Model.CurrentPage.Price</strong></p>
+</div>

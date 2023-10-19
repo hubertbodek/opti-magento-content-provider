@@ -60,6 +60,14 @@ public class StartPage : SitePageData
     [Display(GroupName = Globals.GroupNames.SiteSettings)]
     public virtual PageReference SearchPageLink { get; set; }
 
+    [Display(
+        Name = "Categories folder",
+        GroupName = Globals.GroupNames.SiteSettings)
+    ]
+    [AllowedTypes(typeof(FolderPage))]
+    public virtual PageReference ExternalCategoriesFolderLink { get; set; }
+    
     [Display(GroupName = Globals.GroupNames.SiteSettings)]
     public virtual SiteLogotypeBlock SiteLogotype { get; set; }
+    
 }
