@@ -32,7 +32,6 @@ public class ProviderHelper
         productContent.Sku = product.Sku;
         productContent.Name = product.Name;
         productContent.Title = product.Name;
-        productContent.Description = "Description placeholder";
         productContent.Price = product.Price;
 
         productContent.MakeReadOnly();

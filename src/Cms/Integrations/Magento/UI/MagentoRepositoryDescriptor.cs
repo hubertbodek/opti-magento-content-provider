@@ -17,7 +17,7 @@ public class MagentoRepositoryDescriptor : ContentRepositoryDescriptorBase
     public override string Name => "Magento Content";
     
     public override IEnumerable<ContentReference> Roots { get { return new[] { _contentProviderManager.Service.GetProvider(MagentoProvider.Key).EntryPoint }; } }
-    public override IEnumerable<Type> ContainedTypes { get { return new[] { typeof(ProductContent), typeof(CategoryContent) }; } }
+    public override IEnumerable<Type> ContainedTypes { get { return new[] { typeof(ProductContent) }; } }
     public override IEnumerable<Type> MainNavigationTypes { get { return new[] { typeof(ContentFolder) }; } }
-    public override IEnumerable<Type> CreatableTypes { get { return new[] { typeof(ProductContent), typeof(CategoryContent) }; } }
+    public override IEnumerable<Type> CreatableTypes { get { return new[] { typeof(ProductContent) }; } }
 }

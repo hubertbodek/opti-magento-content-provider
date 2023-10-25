@@ -77,7 +77,6 @@ public class PopulateMagentoPagesJob : ScheduledJobBase
             };
             
             CreateCategoryTree(parent.ContentLink, magentoCategoryFolder, id);
-            
             categoriesCreated++;
         }
         

@@ -11,15 +11,14 @@ using ContentFolder = EPiServer.Core.ContentFolder;
 
 namespace Cms.Integrations.Magento;
 
-public sealed class MagentoProvider : ContentProvider
+public class MagentoProvider : ContentProvider
 {
     private readonly Injected<IdentityMappingService> _identityMappingService;
-    private Injected<IMagentoClient> _magentoClient;
-
     private List<ProductExternal> _products;
     private List<CategoryExternal> _categories;
+    private Injected<IMagentoClient> _magentoClient;
     
-    public const string Key = "magentokey";
+    public const string Key = ProviderConstants.Key;
 
     protected override IContent LoadContent(ContentReference contentLink, ILanguageSelector languageSelector)
     {

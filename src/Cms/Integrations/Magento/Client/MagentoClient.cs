@@ -16,6 +16,7 @@ public class MagentoClient : IMagentoClient
 
     public async Task<string> GetToken()
     {
+        // TODO
         var response = _httpClient.GetAsync(ApiUrlConstants.Token).Result;
         response.EnsureSuccessStatusCode();
 

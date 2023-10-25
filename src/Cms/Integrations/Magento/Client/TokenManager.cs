@@ -7,6 +7,7 @@ public interface ITokenManager
 
 public class TokenManager : ITokenManager
 {
+    // TODO
     private readonly MagentoClient _httpClient;
     private string _token;
 
